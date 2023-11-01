@@ -133,18 +133,32 @@ const main = async () => {
       contractNetworks,
       isL1SafeMasterCopy: false,
     });
-    console.log("connected to safe at", safeAgain.getAddress()); // should be the same as above
 
     // Sending a transaction
     const safeTransaction = await safeAgain.createTransaction({
       safeTransactionData: {
-        to: args.data,
+        to: args.to,
         value: "0",
         data: args.data,
         safeTxGas: 500000,
       },
     });
-    console.log("Safe transaction calldata: ", safeTransaction.bytes);
+
+    const safeTransactionHash = await safeAgain.getTransactionHash(
+      safeTransaction
+    );
+
+    console.log("safe addreess: ", safeAddress);
+    const approveHashCallData = "0xd4d9bdcd" + safeTransactionHash.slice(2);
+    console.log("Calldata: " + approveHashCallData);
+
+    const signedSafeTransaction = await safeAgain.signTransaction(
+      safeTransaction
+    );
+    const txResponse = await safeAgain.executeTransaction(
+      signedSafeTransaction
+    );
+    console.log("Executed safe transaction: ", txResponse.hash);
   }
 };
 
